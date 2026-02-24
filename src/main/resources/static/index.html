@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>University Student Service</title>
+</head>
+<body>
+
+<h2>Add Student</h2>
+
+<input type="text" id="name" placeholder="Name">
+<input type="email" id="email" placeholder="Email">
+<input type="number" id="age" placeholder="Age">
+<button onclick="addStudent()">Add</button>
+
+<hr>
+
+<h2>All Students</h2>
+<button onclick="loadStudents()">Load Students</button>
+
+<ul id="studentList"></ul>
+
+<script>
+
+    const BASE_URL = "http://localhost:8081/api/students";
+
+    function addStudent() {
+
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            age: parseInt(document.getElementById("age").value)
+        };
+
+        fetch(BASE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(student)
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert("Student added with ID: " + data.id);
+            loadStudents();
+        })
+        .catch(err => alert("Error: " + err));
+    }
+
+    function loadStudents() {
+
+        fetch(BASE_URL + "?page=0&size=10")
+        .then(res => res.json())
+        .then(data => {
+
+            const list = document.getElementById("studentList");
+            list.innerHTML = "";
+
+            data.content.forEach(student => {
+
+                const li = document.createElement("li");
+                li.innerHTML =
+                    student.id + " - " +
+                    student.name + " - " +
+                    student.email + " - " +
+                    student.age +
+                    " <button onclick='deleteStudent(" + student.id + ")'>Delete</button>";
+
+                list.appendChild(li);
+            });
+        });
+    }
+
+    function deleteStudent(id) {
+
+        fetch(BASE_URL + "/" + id, {
+            method: "DELETE"
+        })
+        .then(() => {
+            alert("Deleted");
+            loadStudents();
+        });
+    }
+
+</script>
+
+</body>
+</html>
